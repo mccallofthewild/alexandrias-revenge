@@ -47,8 +47,12 @@ Publish to Heroku, or your host of choice.
 Set the following environment variables accordingly:
 <table>
   <tr>
-    <th>NODE_ENV</th>
-    <th>production</th>
+	  <th>Name</th>
+	  <th>Value</th>
+	</tr>
+  <tr>
+    <td>NODE_ENV</td>
+    <td>production</td>
   </tr>
   <tr>
     <td>WALLET_FILE_SECRET</td>
