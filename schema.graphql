@@ -2,6 +2,7 @@ type Query {
 	archivePreview(parseResult: ParseResultInput!): String! # HTML Preview
 	archivePublishStatus(txId: ID!): PublishStatus!
 	walletDonationAddress: String!
+	archivedArticles: [ParseResult!]!
 }
 
 type Mutation {
@@ -21,6 +22,7 @@ enum PublishStatus {
 }
 
 type ParseResult {
+	id: ID
 	type: String!
 	content: String
 	author: String

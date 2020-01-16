@@ -17,6 +17,7 @@ import { PermawebService } from './services/PermawebService';
 import Mercury from '@postlight/mercury-parser';
 import { Archive } from './@types/Archive';
 import express from 'express';
+import bodyParser from 'body-parser';
 
 if (Env.NODE_ENV == 'development') {
 	const devEnv = require('../env.json');
@@ -33,6 +34,10 @@ const permawebService = new PermawebService({
 	wallet: JSON.parse(WalletService.decryptFile(Files.ENCRYPTED_WALLET_PATH))
 });
 
+// permawebService
+// 	.loadAllArticles()
+// 	.then(console.log)
+// 	.catch(console.error);
 // A schema is a collection of type definitions (hence "typeDefs")
 // that together define the "shape" of queries that are executed against
 // your data.
@@ -66,6 +71,9 @@ const resolvers: {
 				permawebService.wallet
 			);
 			return address;
+		},
+		async archivedArticles() {
+			return await permawebService.loadAllArticles();
 		}
 	},
 	Mutation: {
@@ -103,6 +111,15 @@ server.setGraphQLPath('/graphql');
 const PORT = process.env.PORT || 4000;
 
 const app = express();
+
+app.use(
+	bodyParser.urlencoded({
+		limit: '50mb',
+		extended: true,
+		parameterLimit: 500000
+	})
+);
+app.use(bodyParser.json({ limit: '50mb' }));
 
 server.applyMiddleware({ app });
 

@@ -6,11 +6,8 @@
 		<meta http-equiv="X-UA-Compatible" content="ie=edge" />
 		<title>Alexandria's Revenge</title>
 		<style>
-			iframe {
-				width: 90vw;
-				height: 80vw;
-				overflow: scroll;
-				background: white;
+			body[loading] {
+				cursor: progress;
 			}
 			body {
 				position: relative;
@@ -22,9 +19,14 @@
 				background-image: url('/background.png');
 				background-size: 100% auto;
 				background-repeat: no-repeat;
+				background-attachment: fixed;
 				margin: 0;
 				padding: 0;
 				min-width: 100vw;
+				font-family: monospace;
+			}
+			button {
+				cursor: pointer;
 			}
 			main {
 				display: block;
@@ -39,10 +41,55 @@
 				max-width: 100%;
 			}
 			main .subtitle {
-				font-family: RobotoMono-Medium;
+				font-family: monospace;
 				font-size: 20px;
 				color: #ff0058;
 				letter-spacing: 0;
+			}
+			main .archive-form-area {
+				position: relative;
+			}
+			body[article-preview-loaded] main .archive-form-area {
+				position: fixed;
+				top: 0;
+				right: 0;
+				left: 0;
+				bottom: 0;
+				width: 100%;
+			}
+			body[article-preview-loaded] main .archive-button,
+			body[article-preview-loaded] main .close-button {
+				display: block;
+			}
+			main .archive-button {
+				display: none;
+				position: absolute;
+				top: 0;
+				right: 0;
+				height: 68px;
+				text-transform: uppercase;
+				background-color: #ff0058;
+				color: black;
+				border: none;
+				font-weight: 800;
+				padding-left: 2em;
+				padding-right: 2em;
+				font-size: 20px;
+			}
+			main .close-button {
+				display: none;
+				position: absolute;
+				bottom: 0;
+				right: 0;
+				height: 68px;
+				text-transform: uppercase;
+				background-color: black;
+				color: white;
+				border: none;
+				font-weight: 800;
+				padding-left: 2em;
+				padding-right: 2em;
+				font-size: 20px;
 			}
 			main .url-input {
 				height: 68px;
@@ -53,7 +100,7 @@
 				outline: none !important;
 				border: none;
 				border-bottom: 6px solid #d8d8d8;
-				font-family: RobotoMono-LightItalic;
+				font-family: monospace;
 				font-size: 20px;
 				color: #909090;
 				letter-spacing: 0;
@@ -64,35 +111,58 @@
 					rgba(0, 0, 0, 0) 100%
 				);
 			}
+			body:not([article-preview-loaded]) iframe {
+				/* opacity: 0; */
+				height: 0px !important;
+				max-height: 0px;
+				min-height: 0px;
+			}
+			iframe {
+				transition: all 450ms ease-in;
+				width: 100%;
+				overflow: scroll;
+				background: white;
+			}
 		</style>
 	</head>
 	<body>
 		<main>
+			<p style="color: white; font-family: monospace;">
+				Donate:<span id="walletDonationAddress"></span>
+			</p>
 			<img src="logo.svg" alt="logo" height="33%" class="logo" />
 			<p class="subtitle">
 				The bold new archive that can’t be burned, bulldozed or <br />
 				battering-rammed
 				<em>#PoweredByArweave</em>
 			</p>
-			<input
-				type="url"
-				id="uri"
-				required
-				dev-value="https://en.wikipedia.org/wiki/Special:Random"
-				placeholder="https://paste-a-link-to-preview.here"
-				class="url-input"
-			/>
+			<div class="archive-form-area">
+				<input
+					type="url"
+					id="uri"
+					required
+					dev-value="https://en.wikipedia.org/wiki/Special:Random"
+					placeholder="https://paste-a-link-to-preview.here"
+					class="url-input"
+				/>
+				<button class="archive-button" id="archive-button">
+					Archive
+				</button>
+				<button class="close-button" id="close-button">
+					Close
+				</button>
+				<iframe
+					style="overflow:hidden;box-shadow: 0px 5px 15px rgba(0,0,0,0.2);"
+					height="100%"
+					width="100%"
+					frameborder="0"
+					id="preview-area"
+				>
+					The “iframe” tag is not supported by your browser.
+				</iframe>
+			</div>
 		</main>
-		<button id="archive-button">Archive Forever</button>
-		<iframe
-			style="overflow:hidden;height:100vh;width:90vw;box-shadow: 0px 5px 15px rgba(0,0,0,0.2);"
-			height="100%"
-			width="100%"
-			frameborder="0"
-			id="preview-area"
-		>
-			The “iframe” tag is not supported by your browser.
-		</iframe>
+
 		<script>
 			(() => {
 				let currentSnapshot = null;
@@ -133,51 +203,93 @@
 				const els = {
 					uri: document.getElementById('uri'),
 					previewArea: document.getElementById('preview-area'),
-					archiveButton: document.getElementById('archive-button')
+					archiveButton: document.getElementById('archive-button'),
+					donationAddressEl: document.getElementById('walletDonationAddress'),
+					closeButton: document.getElementById('close-button')
 				};
-				els.uri.addEventListener('input', async e => {
-					console.log(e.target.value);
-					els.previewArea.src = null;
-					const isURI = /[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gim.test(
-						e.target.value
-					);
-					if (isURI) {
-						const scrapeRes = await graphql`
-							mutation scrape($url: String!) {
-								scrapeWebsite(url: $url) {
-									type
-									content
-									author
-									title
-									sample
-									publishedAt
-									textDirection
-									wordCount
-									heroImageUrl
-									afinnSentimentScore
-								}
-							}
-						`({
-							url: e.target.value
-						});
-						state.parseResult = scrapeRes.data.scrapeWebsite;
-						console.log(state);
-						const previewRes = await graphql`
-							query preview($parseResult: ParseResultInput!) {
-								archivePreview(parseResult: $parseResult)
-							}
-						`({
-							parseResult: state.parseResult
-						});
-						console.log(previewRes);
-						state.previewHTML = previewRes.data.archivePreview;
-						els.previewArea.src = `data:text/html;base64,${btoa(
-							state.previewHTML
-						)}`;
+				const methods = {
+					startLoading() {
+						document.body.setAttribute('loading', 'loading');
+					},
+					stopLoading() {
+						document.body.removeAttribute('loading');
+					},
+					setArticlePreviewLoaded(bool) {
+						if (bool) {
+							document.body.setAttribute('article-preview-loaded', true);
+						} else {
+							document.body.removeAttribute('article-preview-loaded');
+						}
 					}
+				};
+				(async () => {
+					const {
+						data: { walletDonationAddress }
+					} = await graphql`
+						{
+							walletDonationAddress
+						}
+					`();
+					els.donationAddressEl.innerHTML = walletDonationAddress;
+				})();
+
+				els.closeButton.addEventListener('click', () => {
+					methods.setArticlePreviewLoaded(false);
+					state.previewHTML = null;
+					state.parseResult = null;
+				});
+				els.uri.addEventListener('input', async e => {
+					methods.setArticlePreviewLoaded(false);
+					methods.startLoading();
+					try {
+						console.log(e.target.value);
+						els.previewArea.src = null;
+						const isURI = /[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gim.test(
+							e.target.value
+						);
+						if (isURI) {
+							const scrapeRes = await graphql`
+								mutation scrape($url: String!) {
+									scrapeWebsite(url: $url) {
+										type
+										content
+										author
+										title
+										sample
+										publishedAt
+										textDirection
+										wordCount
+										heroImageUrl
+										afinnSentimentScore
+									}
+								}
+							`({
+								url: e.target.value
+							});
+							state.parseResult = scrapeRes.data.scrapeWebsite;
+							console.log(state);
+							const previewRes = await graphql`
+								query preview($parseResult: ParseResultInput!) {
+									archivePreview(parseResult: $parseResult)
+								}
+							`({
+								parseResult: state.parseResult
+							});
+							console.log(previewRes);
+							state.previewHTML = previewRes.data.archivePreview;
+							els.previewArea.src = `data:text/html;base64,${btoa(
+								state.previewHTML
+							)}`;
+						}
+					} catch (e) {
+						console.error(e);
+					}
+					methods.stopLoading();
+					methods.setArticlePreviewLoaded(true);
 				});
 
 				els.archiveButton.addEventListener('click', async e => {
+					methods.startLoading();
 					const publishRes = await graphql`
 						mutation archive($parseResult: ParseResultInput!) {
 							publishArchive(parseResult: $parseResult)
@@ -190,22 +302,27 @@
 					let count = 0;
 					while (true) {
 						if (count++ > 1000) return;
-						await new Promise(r => setTimeout(r, 1000));
-						const {
-							data: { archivePublishStatus }
-						} = await graphql`
-							query publishStatus($txId: ID!) {
-								archivePublishStatus(txId: $txId)
+						try {
+							await new Promise(r => setTimeout(r, 1000));
+							const {
+								data: { archivePublishStatus }
+							} = await graphql`
+								query publishStatus($txId: ID!) {
+									archivePublishStatus(txId: $txId)
+								}
+							`({
+								txId: state.publishedArchiveId
+							});
+							console.log(archivePublishStatus);
+							if (archivePublishStatus == 'SUCCESS') {
+								alert('SUCCESS ' + 'arweave.net/' + state.publishedArchiveId);
+								return;
 							}
-						`({
-							txId: state.publishedArchiveId
-						});
-						console.log(archivePublishStatus);
-						if (archivePublishStatus == 'SUCCESS') {
-							alert('SUCCESS ' + 'arweave.net/' + state.publishedArchiveId);
-							return;
+						} catch (e) {
+							console.error(e);
 						}
 					}
+					methods.stopLoading();
 				});
 			})();
 		</script>
