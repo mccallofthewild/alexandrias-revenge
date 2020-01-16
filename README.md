@@ -9,6 +9,12 @@ If you only want to build an archive front-end, don't worry about setting up up 
 
 
 ## Server 
+### Requirements 
+* A non-empty Arweave wallet
+* Node.js >=v10.1.0
+* NPM or Yarn 
+* Git
+
 Looking to spin up the backend? That's a piece of cake too. 
 <!-- #### Heroku
 Smash this Deploy button! 
@@ -27,8 +33,9 @@ or
 npm i
 ```
 ### Configure Wallet
-Move an Arweave JWK wallet into the root directory of the project. Name it `wallet.json`.
-Create a file named `env.json`. Fill it with:
+1. Move an Arweave JWK wallet into the root directory of the project. 
+2. Name it `wallet.json`.
+3. Create a file named `env.json`. Fill it with:
 ```
 {
 	"WALLET_FILE_SECRET": "yourcomplexandcryptographicallysecurepassword"
@@ -40,7 +47,7 @@ From the command line, run:
 ```
 yarn dev
 ```
-This simultaneously starts the server and updates the encrypted wallet (`wallet.json.enc`) to be your Arweave wallet encrypted with your password.
+This simultaneously starts the development server and updates the encrypted wallet (`wallet.json.enc`) to be your Arweave wallet encrypted with your password.
 
 ### Host
 Publish to Heroku, or your host of choice.
