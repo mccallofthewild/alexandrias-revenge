@@ -1,6 +1,7 @@
 type Query {
 	archivePreview(parseResult: ParseResultInput!): String! # HTML Preview
 	archivePublishStatus(txId: ID!): PublishStatus!
+	walletDonationAddress: String!
 }
 
 type Mutation {

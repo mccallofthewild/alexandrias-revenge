@@ -56,6 +56,12 @@ const resolvers: {
 				return 'PENDING';
 			}
 			return txInfo.status == 404 ? 'PENDING' : 'FAILED';
+		},
+		async walletDonationAddress() {
+			const address = await PermawebService.arweave.wallets.jwkToAddress(
+				permawebService.wallet
+			);
+			return address;
 		}
 	},
 	Mutation: {
@@ -89,6 +95,6 @@ const server = new ApolloServer({
 server.setGraphQLPath('/graphql');
 
 // The `listen` method launches a web server.
-server.listen().then(({ url, ...rest }) => {
+server.listen({ port: process.env.PORT || 4000 }).then(({ url, ...rest }) => {
 	console.log(`🚀  Server ready at ${url}`);
 });
