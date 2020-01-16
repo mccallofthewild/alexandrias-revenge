@@ -89,13 +89,15 @@
 			for (let article of articles) {
 				refs.archivedArticlesList.innerHTML += /* html */ `
 					<li class="list-item">
-						<div class="list-item__image" style="background-image: url(${article.heroImageUrl});"></div>
-						<div class="list-item__content">
-							<h3>${article.title}</h3>
-							<p>${article.sample}</p>
-							<p>by ${article.author}</p>
-							<p style="text-transform: uppercase">${article.humanReadableSentiment} Sentiment</p>
-						</div>
+						<a href="https://arweave.net/${article.id}" target="_blank">
+							<div class="list-item__image" style="background-image: url(${article.heroImageUrl});"></div>
+							<div class="list-item__content">
+								<h3>${article.title}</h3>
+								<p>📜${article.sample}</p>
+								<p>👩‍💻by ${article.author}</p>
+								<p style="text-transform: uppercase">${article.humanReadableSentiment} Sentiment</p>
+							</div>
+						</a>
 					</li>
 				`;
 			}

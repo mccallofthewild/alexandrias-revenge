@@ -119,16 +119,23 @@ main .archived-articles {
 	height: 100px;
 	background-size: cover;
 	background-repeat: no-repeat;
+	filter: sepia(1) hue-rotate(-211deg);
 }
 .list-item__content {
 	padding: 15px;
 }
-main .archived-articles li {
+.list-item {
+	font-size: 1.2em;
 	background: #fafafa;
-	color: black;
-	max-width: 250px;
+	color: black !important;
+	text-decoration: none !important;
+	max-width: 300px;
 	margin: 10px;
 	list-style: none;
+}
+.list-item a {
+	color: inherit !important;
+	text-decoration: inherit !important;
 }
 .archived-articles h3 {
 	text-transform: uppercase;
