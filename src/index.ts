@@ -1,10 +1,32 @@
 import './polyfills';
-import { ApolloServer, gql, IResolverObject } from 'apollo-server';
+import { ApolloServer, gql, IResolverObject, PubSub } from 'apollo-server';
 import fs from 'fs';
 import path from 'path';
 import { ExpressContext } from 'apollo-server-express/src/ApolloServer';
+import { SocketEvents } from './constants/SocketEvents';
+import { ReaderService } from './services/ReaderService';
+import { Files } from './constants/Files';
+import { WalletService } from './services/WalletService';
+import { Env } from './constants/Env';
+import { PermawebService } from './services/PermawebService';
+import Mercury from '@postlight/mercury-parser';
+import { Archive } from './@types/Archive';
 
-const uuidv4 = require('uuid/v4');
+if (Env.NODE_ENV == 'development') {
+	const devEnv = require('../env.json');
+	for (let prop in devEnv) {
+		process.env[prop] = devEnv[prop];
+	}
+}
+
+if (Env.NODE_ENV == 'development' && fs.existsSync(Files.WALLET_PATH)) {
+	WalletService.encryptFile(Files.WALLET_PATH, Files.ENCRYPTED_WALLET_PATH);
+}
+
+const permawebService = new PermawebService({
+	wallet: JSON.parse(WalletService.decryptFile(Files.ENCRYPTED_WALLET_PATH))
+});
+
 // A schema is a collection of type definitions (hence "typeDefs")
 // that together define the "shape" of queries that are executed against
 // your data.
@@ -12,15 +34,44 @@ const typeDefs = gql`
 	${fs.readFileSync(path.resolve(__dirname, '../schema.graphql'))}
 `;
 
+const pubsub = new PubSub();
+
 const resolvers: {
 	Query: IResolverObject<any, ContextType, any>;
 	Mutation: IResolverObject<any, ContextType, any>;
 } = {
 	Query: {
-		// books: (parent, args, ctx) => books
+		async archivePreview(
+			parent,
+			{ parseResult: parsed }: { parseResult: Archive.Article }
+		) {
+			return ReaderService.renderPageFromTemplate(parsed);
+		},
+		async archivePublishStatus(parent, { txId }: { txId: string }) {
+			const txInfo = await PermawebService.arweave.transactions.getStatus(txId);
+			console.log(txInfo);
+			if (txInfo.status.toString().startsWith('2')) {
+				if (txInfo.confirmed) {
+					return 'SUCCESS';
+				}
+				return 'PENDING';
+			}
+			return 'FAILED';
+		}
 	},
 	Mutation: {
-		// async createNote(p, { note }, { pool, sql }) {}
+		async scrapeWebsite(parent, { url }, ctx) {
+			const parsed = await ReaderService.parse(url);
+			return parsed;
+		},
+		async publishArchive(
+			parent,
+			{ parseResult: parsed }: { parseResult: Archive.Article },
+			ctx
+		) {
+			const txId = await permawebService.publishArticle(parsed);
+			return txId;
+		}
 	}
 };
 

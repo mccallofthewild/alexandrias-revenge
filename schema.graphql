@@ -1,0 +1,46 @@
+type Query {
+	archivePreview(parseResult: ParseResultInput!): String! # HTML Preview
+	archivePublishStatus(txId: ID!): PublishStatus!
+}
+
+type Mutation {
+	scrapeWebsite(url: String!): ParseResult!
+	publishArchive(parseResult: ParseResultInput!): String! # Permalink (or just the site URL bc it could take a while and you'll have the socket results coming through)
+}
+
+enum ParseResultDirection {
+	rtl
+	ltr
+}
+
+enum PublishStatus {
+	PENDING
+	FAILED
+	SUCCESS
+}
+
+type ParseResult {
+	type: String!
+	content: String
+	author: String
+	title: String
+	sample: String
+	publishedAt: String
+	textDirection: String
+	wordCount: Float!
+	heroImageUrl: String
+	afinnSentimentScore: Float!
+}
+
+input ParseResultInput {
+	type: String!
+	content: String
+	author: String
+	title: String
+	sample: String
+	publishedAt: String
+	textDirection: String
+	wordCount: Float!
+	heroImageUrl: String
+	afinnSentimentScore: Float!
+}

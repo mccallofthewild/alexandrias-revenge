@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta http-equiv="X-UA-Compatible" content="ie=edge" />
+		<title>Archiver</title>
+		<style>
+			iframe {
+				width: 90vw;
+				height: 80vw;
+				overflow: scroll;
+			}
+			body {
+				white-space: pre-wrap;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>My Archiver</h1>
+		<form id="archive-preview-form">
+			<input
+				type="text"
+				id="uri"
+				value="https://en.wikipedia.org/wiki/Special:Random"
+				style="width: 500px"
+			/>
+		</form>
+		<button id="archive-button">Archive Forever</button>
+		<iframe
+			style="overflow:hidden;height:100vh;width:90vw;box-shadow: 0px 5px 15px rgba(0,0,0,0.2);"
+			height="100%"
+			width="100%"
+			frameborder="0"
+			id="preview-area"
+		>
+			The “iframe” tag is not supported by your browser.
+		</iframe>
+		<script>
+			(() => {
+				let currentSnapshot = null;
+				setInterval(() => {
+					fetch(window.location.href)
+						.then(res => res.text())
+						.then(text => {
+							if (!currentSnapshot) {
+								currentSnapshot = text;
+							} else {
+								if (currentSnapshot != text) window.location.reload();
+							}
+						});
+				}, 1000);
+				const isDev = window.location.href.includes(':8080');
+				const GRAPHQL_URI = isDev ? 'http://localhost:4000/' : '';
+				const state = {
+					parseResult: null,
+					previewHTML: null,
+					publishedArchiveId: null
+				};
+				const graphql = (...templateLiteral) => async (variables = {}) => {
+					const response = await fetch(GRAPHQL_URI, {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+							Accept: 'application/json'
+							// Authorization: `Bearer ${authToken}`
+						},
+						body: JSON.stringify({
+							query: String.raw(...templateLiteral),
+							variables
+						})
+					});
+					return await response.json();
+				};
+				const els = {
+					uri: document.getElementById('uri'),
+					previewArea: document.getElementById('preview-area'),
+					archiveButton: document.getElementById('archive-button')
+				};
+				els.uri.addEventListener('input', async e => {
+					console.log(e.target.value);
+					els.previewArea.src = null;
+					const isURI = /[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gim.test(
+						e.target.value
+					);
+					if (isURI) {
+						const scrapeRes = await graphql`
+							mutation scrape($url: String!) {
+								scrapeWebsite(url: $url) {
+									type
+									content
+									author
+									title
+									sample
+									publishedAt
+									textDirection
+									wordCount
+									heroImageUrl
+									afinnSentimentScore
+								}
+							}
+						`({
+							url: e.target.value
+						});
+						state.parseResult = scrapeRes.data.scrapeWebsite;
+						console.log(state);
+						const previewRes = await graphql`
+							query preview($parseResult: ParseResultInput!) {
+								archivePreview(parseResult: $parseResult)
+							}
+						`({
+							parseResult: state.parseResult
+						});
+						console.log(previewRes);
+						state.previewHTML = previewRes.data.archivePreview;
+						els.previewArea.src = `data:text/html;base64,${btoa(
+							state.previewHTML
+						)}`;
+					}
+				});
+
+				els.archiveButton.addEventListener('click', async e => {
+					const publishRes = await graphql`
+						mutation archive($parseResult: ParseResultInput!) {
+							publishArchive(parseResult: $parseResult)
+						}
+					`({
+						parseResult: state.parseResult
+					});
+					console.log(publishRes);
+					state.publishedArchiveId = publishRes.data.publishArchive;
+					let count = 0;
+					while (true) {
+						if (count++ > 1000) return;
+						await new Promise(r => setTimeout(r, 1000));
+						const {
+							data: { archivePublishStatus }
+						} = await graphql`
+							query publishStatus($txId: ID!) {
+								archivePublishStatus(txId: $txId)
+							}
+						`({
+							txId: state.publishedArchiveId
+						});
+						console.log(archivePublishStatus);
+						if (archivePublishStatus == 'SUCCESS') {
+							alert('SUCCESS ' + 'arweave.net/' + state.publishedArchiveId);
+						}
+					}
+				});
+			})();
+		</script>
+	</body>
+</html>

@@ -6,7 +6,10 @@ npm-debug.log
 
 # Environment Variables
 .env
+env.json
 
 .DS_Store
 
 lib
+
+wallet.json

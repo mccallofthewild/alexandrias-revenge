@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta http-equiv="X-UA-Compatible" content="ie=edge" />
+		<title>${this.parsed.title}</title>
+		<!-- OpenGraph Start -->
+		<meta property="og:title" content="${this.parsed.title}" />
+		<meta property="og:description" content="${this.parsed.sample || ''}" />
+		<meta property="og:type" content="website" />
+		<meta property="og:image" content="${this.parsed.heroImageUrl}" />
+		<!-- OpenGraph End -->
+	</head>
+	<body>
+		<article>
+			<h1>${this.parsed.title}</h1>
+			<section class="details">
+				<p>Author: ${ this.parsed.author || 'unknown' }</p>
+				<p>
+					Sentiment: ${ !this.parsed.afinnSentimentScore ? 'none' :
+					this.parsed.afinnSentimentScore < 2.5 ? '☹️ very negative' :
+					this.parsed.afinnSentimentScore < 5 ? '😕 negative' :
+					this.parsed.afinnSentimentScore==5 ? '😐 neutral' :
+					this.parsed.afinnSentimentScore < 7.5 ? '🙂 positive' : `😁 very
+					positive` }
+				</p>
+			</section>
+			${this.parsed.content}
+		</article>
+	</body>
+</html>
