@@ -5,11 +5,16 @@ import Transaction, { Tag } from 'arweave/node/lib/transaction';
 import { Archive } from '../@types/Archive';
 import fetch from 'cross-fetch';
 import { ReaderService } from './ReaderService';
+import DataLoader from 'dataloader';
+
 const arweave = Arweave.init({
 	host: 'arweave.net',
 	protocol: 'https'
 });
 
+const txDataLoader = new DataLoader<string, Transaction>(async ids => {
+	return await Promise.all(ids.map(id => arweave.transactions.get(id)));
+});
 export class PermawebService {
 	static arweave = arweave;
 	wallet: JWKInterface;
@@ -95,9 +100,7 @@ export class PermawebService {
 			'App-Name': this.DefaultTags['App-Name']
 		});
 		const txIds = await arweave.arql(query);
-		const txs = await Promise.all(
-			txIds.map(id => arweave.transactions.get(id))
-		);
+		const txs = await Promise.all(txIds.map(id => txDataLoader.load(id)));
 		console.log('transactions : ' + txs.length);
 		const getVal = (tag: Tag) => {
 			let val;

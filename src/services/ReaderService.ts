@@ -6,13 +6,33 @@ import cheerio from 'cheerio';
 import fetch from 'cross-fetch';
 import { Archive } from '../@types/Archive';
 import Sentiment from 'sentiment';
+import { ReadingTime } from '../utils/ReadingTime';
+import DataLoader from 'dataloader';
 const sentiment = new Sentiment();
+const parsedSiteLoader = new DataLoader<string, Mercury.ParseResult>(
+	async function batchFunction(urls: readonly string[]) {
+		const results = await Promise.all(
+			urls.map(async url => {
+				setTimeout(() => {
+					parsedSiteLoader.clear(url);
+				}, 10 * 60 * 1000);
+				try {
+					return await Mercury.parse(url);
+				} catch (e) {
+					return e;
+				}
+			})
+		);
+		return results;
+	}
+);
 export class ReaderService {
 	static async parse(url: string): Promise<Archive.Article> {
-		const parsed = await Mercury.parse(url);
+		const parsed = await parsedSiteLoader.load(url);
 		const $ = cheerio.load(parsed.content || '');
 		const text = $.root().text();
 		const afinnSentimentScore = sentiment.analyze(text).score;
+		const readingTimeInMs = ReadingTime.calculate(text).time;
 		return {
 			type: 'Article',
 			content: parsed.content || '',
@@ -27,7 +47,8 @@ export class ReaderService {
 			originUrl: parsed.url,
 			archivedAt: new Date().toISOString(),
 			heroImageUrl: parsed.lead_image_url,
-			afinnSentimentScore
+			afinnSentimentScore,
+			readingTimeInMs
 		};
 	}
 

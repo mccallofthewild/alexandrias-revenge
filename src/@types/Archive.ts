@@ -16,5 +16,6 @@ export declare namespace Archive {
 		wordCount: number;
 		heroImageUrl: string | null;
 		afinnSentimentScore: number;
+		readingTimeInMs: number | null;
 	}
 }

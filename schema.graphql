@@ -33,6 +33,11 @@ type ParseResult {
 	wordCount: Float!
 	heroImageUrl: String
 	afinnSentimentScore: Float!
+	readingTimeInMs: Float
+	originUrl: String!
+	archivedAt: String!
+	#computed
+	humanReadableSentiment: String!
 }
 
 input ParseResultInput {
@@ -46,4 +51,7 @@ input ParseResultInput {
 	wordCount: Float!
 	heroImageUrl: String
 	afinnSentimentScore: Float!
+	readingTimeInMs: Float
+	originUrl: String!
+	archivedAt: String!
 }

@@ -30,6 +30,9 @@
 				</p>
 			</section>
 			${this.parsed.content}
+			<script>
+				window.__sharedData = ${JSON.stringify(this.parsed)}
+			</script>
 		</article>
 	</body>
 </html>

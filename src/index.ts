@@ -18,6 +18,7 @@ import Mercury from '@postlight/mercury-parser';
 import { Archive } from './@types/Archive';
 import express from 'express';
 import bodyParser from 'body-parser';
+import DataLoader from 'dataloader';
 
 if (Env.NODE_ENV == 'development') {
 	const devEnv = require('../env.json');
@@ -48,7 +49,24 @@ const typeDefs = gql`
 const resolvers: {
 	Query: IResolverObject<any, ContextType, any>;
 	Mutation: IResolverObject<any, ContextType, any>;
+	[key: string]: IResolverObject<any, ContextType, any>;
 } = {
+	ParseResult: {
+		humanReadableSentiment(parent) {
+			return !parent.afinnSentimentScore
+				? 'none'
+				: parent.afinnSentimentScore < 2.5
+				? '☹️ very negative'
+				: parent.afinnSentimentScore < 5
+				? '😕 negative'
+				: parent.afinnSentimentScore == 5
+				? '😐 neutral'
+				: parent.afinnSentimentScore < 7.5
+				? '🙂 positive'
+				: `😁 very
+					positive`;
+		}
+	},
 	Query: {
 		async archivePreview(
 			parent,
@@ -119,7 +137,18 @@ app.use(
 		parameterLimit: 500000
 	})
 );
+
 app.use(bodyParser.json({ limit: '50mb' }));
+
+app.get('/preview', async (req, res) => {
+	console.log('getting preview');
+	console.log(req.query);
+	res.send(
+		await ReaderService.renderPageFromTemplate(
+			await ReaderService.parse(req.query.url)
+		)
+	);
+});
 
 server.applyMiddleware({ app });
 
