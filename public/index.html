@@ -17,7 +17,7 @@
 		</style>
 	</head>
 	<body>
-		<h1>My Archiver</h1>
+		<h1>Alexandria's Revenge</h1>
 		<form id="archive-preview-form">
 			<input
 				type="text"
@@ -39,19 +39,21 @@
 		<script>
 			(() => {
 				let currentSnapshot = null;
-				setInterval(() => {
-					fetch(window.location.href)
-						.then(res => res.text())
-						.then(text => {
-							if (!currentSnapshot) {
-								currentSnapshot = text;
-							} else {
-								if (currentSnapshot != text) window.location.reload();
-							}
-						});
-				}, 1000);
+				// development hot reload
+				// setInterval(() => {
+				// 	fetch(window.location.href)
+				// 		.then(res => res.text())
+				// 		.then(text => {
+				// 			if (!currentSnapshot) {
+				// 				currentSnapshot = text;
+				// 			} else {
+				// 				if (currentSnapshot != text) window.location.reload();
+				// 			}
+				// 		});
+				// }, 1000);
 				const isDev = window.location.href.includes(':8080');
-				const GRAPHQL_URI = isDev ? 'http://localhost:4000/' : '';
+				const GRAPHQL_URI =
+					(isDev ? 'http://localhost:4000/' : '') + '/graphql';
 				const state = {
 					parseResult: null,
 					previewHTML: null,
@@ -145,6 +147,7 @@
 						console.log(archivePublishStatus);
 						if (archivePublishStatus == 'SUCCESS') {
 							alert('SUCCESS ' + 'arweave.net/' + state.publishedArchiveId);
+							return;
 						}
 					}
 				});

@@ -56,7 +56,7 @@ const resolvers: {
 				}
 				return 'PENDING';
 			}
-			return 'FAILED';
+			return txInfo.status == 404 ? 'PENDING' : 'FAILED';
 		}
 	},
 	Mutation: {
@@ -86,6 +86,8 @@ const server = new ApolloServer({
 	resolvers,
 	context
 });
+
+server.setGraphQLPath('/graphql');
 
 // The `listen` method launches a web server.
 server.listen().then(({ url, ...rest }) => {
