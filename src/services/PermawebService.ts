@@ -4,6 +4,7 @@ import { JWKInterface } from 'arweave/node/lib/wallet';
 import Transaction from 'arweave/node/lib/transaction';
 import { Archive } from '../@types/Archive';
 import fetch from 'cross-fetch';
+import { ReaderService } from './ReaderService';
 const arweave = Arweave.init({
 	host: 'arweave.net',
 	protocol: 'https'
@@ -15,8 +16,6 @@ export class PermawebService {
 	constructor({ wallet }: { wallet: JWKInterface }) {
 		this.wallet = wallet;
 	}
-	private TAG_PROP_PREFIX = 'Data-Prop-' as const;
-
 	private DefaultTags = {
 		'App-Name': "Alexandria's Revenge ----- TEST",
 		'App-Version': '1.0.0'
@@ -74,7 +73,7 @@ export class PermawebService {
 		}
 		const tx = await arweave.createTransaction(
 			{
-				data: content
+				data: await ReaderService.renderPageFromTemplate(article)
 			},
 			this.wallet
 		);
