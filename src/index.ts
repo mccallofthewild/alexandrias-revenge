@@ -1,8 +1,13 @@
 import './polyfills';
-import { ApolloServer, gql, IResolverObject, PubSub } from 'apollo-server';
 import fs from 'fs';
 import path from 'path';
 import { ExpressContext } from 'apollo-server-express/src/ApolloServer';
+import {
+	ApolloServer,
+	gql,
+	IResolverObject,
+	PubSub
+} from 'apollo-server-express';
 import { SocketEvents } from './constants/SocketEvents';
 import { ReaderService } from './services/ReaderService';
 import { Files } from './constants/Files';
@@ -11,6 +16,7 @@ import { Env } from './constants/Env';
 import { PermawebService } from './services/PermawebService';
 import Mercury from '@postlight/mercury-parser';
 import { Archive } from './@types/Archive';
+import express from 'express';
 
 if (Env.NODE_ENV == 'development') {
 	const devEnv = require('../env.json');
@@ -33,8 +39,6 @@ const permawebService = new PermawebService({
 const typeDefs = gql`
 	${fs.readFileSync(path.resolve(__dirname, '../schema.graphql'))}
 `;
-
-const pubsub = new PubSub();
 
 const resolvers: {
 	Query: IResolverObject<any, ContextType, any>;
@@ -94,7 +98,15 @@ const server = new ApolloServer({
 
 server.setGraphQLPath('/graphql');
 
+const PORT = process.env.PORT || 4000;
+
+const app = express();
+
+server.applyMiddleware({ app });
+
+app.use(express.static('public'));
+
 // The `listen` method launches a web server.
-server.listen({ port: process.env.PORT || 4000 }).then(({ url, ...rest }) => {
-	console.log(`🚀  Server ready at ${url}`);
+app.listen({ port: PORT }, () => {
+	console.log(`🚀  Server ready at ${PORT}`);
 });

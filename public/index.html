@@ -108,9 +108,8 @@
 				// 			}
 				// 		});
 				// }, 1000);
-				const isDev = window.location.href.includes(':8080');
-				const GRAPHQL_URI =
-					(isDev ? 'http://localhost:4000/' : '') + '/graphql';
+				const isDev = !!window.location.port;
+				const GRAPHQL_URI = '/graphql';
 				const state = {
 					parseResult: null,
 					previewHTML: null, // idk

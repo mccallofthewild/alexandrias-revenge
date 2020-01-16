@@ -20,7 +20,6 @@
 		"@postlight/mercury-parser": "^2.2.0",
 		"@types/cheerio": "^0.22.15",
 		"@types/postlight__mercury-parser": "^2.2.2",
-		"apollo-server": "^2.9.14",
 		"apollo-server-express": "^2.9.16",
 		"arweave": "^1.6.0",
 		"body-parser": "^1.19.0",
