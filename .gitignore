@@ -14,5 +14,5 @@ lib
 
 wallet.json
 
+# yarn.lock works better with heroku, but npm works better for typescript development
 package-lock.json
-package-lockd.json
