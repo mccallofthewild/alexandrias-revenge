@@ -93,7 +93,9 @@ export type ContextType = ReturnType<typeof context>;
 const server = new ApolloServer({
 	typeDefs,
 	resolvers,
-	context
+	context,
+	introspection: true,
+	playground: true
 });
 
 server.setGraphQLPath('/graphql');
