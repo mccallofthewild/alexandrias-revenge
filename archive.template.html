@@ -17,9 +17,9 @@
 			<h1>${this.parsed.title}</h1>
 			<section class="details">
 				<p>Author: ${ this.parsed.author || 'unknown' }</p>
-				<p>Published: ${ this.publishedAt }</p>
-				<p>Archived: ${ this.archivedAt }</p>
-				<p>Word Count: ${ this.wordCount }</p>
+				<p>Published: ${ this.parsed.publishedAt }</p>
+				<p>Archived: ${ this.parsed.archivedAt }</p>
+				<p>Word Count: ${ this.parsed.wordCount }</p>
 				<p>
 					Sentiment: ${ !this.parsed.afinnSentimentScore ? 'none' :
 					this.parsed.afinnSentimentScore < 2.5 ? '☹️ very negative' :

@@ -133,7 +133,7 @@
 			<img src="logo.svg" alt="logo" height="33%" class="logo" />
 			<p class="subtitle">
 				The bold new archive that can’t be burned, bulldozed or <br />
-				battering-rammed
+				battering-rammed.
 				<em>#PoweredByArweave</em>
 			</p>
 			<div class="archive-form-area">
@@ -289,6 +289,7 @@
 				});
 
 				els.archiveButton.addEventListener('click', async e => {
+					alert('archiving ' + state.parseResult.title);
 					methods.startLoading();
 					const publishRes = await graphql`
 						mutation archive($parseResult: ParseResultInput!) {
@@ -315,7 +316,11 @@
 							});
 							console.log(archivePublishStatus);
 							if (archivePublishStatus == 'SUCCESS') {
-								alert('SUCCESS ' + 'arweave.net/' + state.publishedArchiveId);
+								alert(
+									'Successfully archived ' +
+										'arweave.net/' +
+										state.publishedArchiveId
+								);
 								return;
 							}
 						} catch (e) {
