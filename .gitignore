@@ -13,3 +13,5 @@ env.json
 lib
 
 wallet.json
+
+package-lock.json
