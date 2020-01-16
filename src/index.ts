@@ -49,7 +49,6 @@ const resolvers: {
 		},
 		async archivePublishStatus(parent, { txId }: { txId: string }) {
 			const txInfo = await PermawebService.arweave.transactions.getStatus(txId);
-			console.log(txInfo);
 			if (txInfo.status.toString().startsWith('2')) {
 				if (txInfo.confirmed) {
 					return 'SUCCESS';

@@ -13,7 +13,6 @@ export class ReaderService {
 		const $ = cheerio.load(parsed.content || '');
 		const text = $.root().text();
 		const afinnSentimentScore = sentiment.analyze(text).score;
-		console.log(parsed);
 		return {
 			type: 'Article',
 			content: parsed.content || '',
