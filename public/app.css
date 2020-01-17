@@ -130,6 +130,7 @@ main .archived-articles {
 	flex-direction: row;
 	margin: 0px;
 	padding: 0px;
+	margin-top: 25px;
 }
 
 .list-item__image {

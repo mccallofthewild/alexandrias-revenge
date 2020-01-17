@@ -2266,6 +2266,10 @@ data-urls@^1.0.0:
     whatwg-mimetype "^2.2.0"
     whatwg-url "^7.0.0"
 
+dataloader@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/dataloader/-/dataloader-2.0.0.tgz#41eaf123db115987e21ca93c005cd7753c55fe6f"
+
 datocms-client@^3.0.6:
   version "3.0.14"
   resolved "https://registry.yarnpkg.com/datocms-client/-/datocms-client-3.0.14.tgz#6b58686f3e8df73b4ec7fc3888ae4051d583d790"
