@@ -2,9 +2,15 @@
 <p align="center">
 Permanent Storage for Curated Knowledge
 </p>
+<p align="center">
+	https://alexandriasrevenge.herokuapp.com/
+</p>
 
 # 🇪🇬 Inspiration
 The Great Library of Alexandria in Alexandria, Egypt, was one of the largest and most significant libraries of the ancient world. Over time, however, it dilapidated into nothing but ash and rubble. <br> The Internet is the Library of Alexandria of our era, yet we take for granted just how vulnerable it is. Even with solar flares, natural disasters, and DDoS attacks aside, valuable knowledge is removed from the internet every day. Servers don't run for free, after all. Archive.org does a lot of great work in this space, but it is dangerous for our civilization to be so dependent on a centralized source. Arweave poises an opportunity to decentralize, and thereby secure the greatest library of our time. The purpose of this project is to capture that opportunity.
+
+# 🏊‍♀️  Product Deepdive 
+(Section Coming Soon)
 
 # 🚀 Usage & Deployment
 ## 🖼 Client 
