@@ -101,7 +101,6 @@ export class PermawebService {
 		});
 		const txIds = await arweave.arql(query);
 		const txs = await Promise.all(txIds.map(id => txDataLoader.load(id)));
-		console.log('transactions : ' + txs.length);
 		const getVal = (tag: Tag) => {
 			let val;
 			try {
@@ -119,7 +118,6 @@ export class PermawebService {
 					value: getVal(tag)
 				}))
 			);
-			console.log(article);
 			article.id = tx.id;
 			article.content = tx.get('data', { decode: true, string: true });
 			return article;

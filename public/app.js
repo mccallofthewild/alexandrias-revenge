@@ -76,6 +76,7 @@
 						humanReadableSentiment
 						wordCount
 						heroImageUrl
+						readingTimeInMs
 					}
 				}
 			`();
@@ -126,27 +127,39 @@
 			for (let article of articles) {
 				await new Promise(r => setTimeout(r, 250));
 				const el = document.createElement('div');
+				console.log(article);
 				el.innerHTML = /* html */ `
 					<li class="list-item animate slideInUp">
 						<a href="https://arweave.net/${article.id}" target="_blank">
-							${
-								article.heroImageUrl
-									? `
-									<div
-										class="list-item__image"
-										style="background-image: url(${article.heroImageUrl});">
-									</div>
-									`
-									: ''
-							}
+							<div
+								class="list-item__image"
+								style="background-image: url(${article.heroImageUrl ||
+									'https://source.unsplash.com/collection/9248817/800x450?' +
+										article.id});"
+										>
+							</div>
+						
 							<div class="list-item__content">
 								${article.isPending ? '<p style="color: red;"><b>Pending!</b></p>' : ''}
 								<h3>${article.title}</h3>
-								<p>📜${article.sample}</p>
+								<p>${article.sample}</p>
 								<p>👩‍💻by ${article.author}</p>
-								<p style="text-transform: uppercase">${
-									article.humanReadableSentiment
-								} Sentiment</p>
+								${
+									article.readingTimeInMs
+										? `<p>⏳${~~(
+												article.readingTimeInMs /
+												1000 /
+												60
+										  )} Minute Read</p>`
+										: ''
+								}
+								<p>${article.humanReadableSentiment} Mood</p>
+								<a href="https://arweave.net/${
+									article.id
+								}" style="word-break: break-all; color: grey !important;" target="_blank">
+									<small>${article.id}</small>
+								</a>
+
 							</div>
 						</a>
 					</li>
@@ -208,6 +221,7 @@
 							afinnSentimentScore
 							originUrl
 							archivedAt
+							readingTimeInMs
 						}
 					}
 				`({

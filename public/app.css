@@ -66,6 +66,10 @@ body[article-preview-loaded] main .archive-form-area {
 	left: 0;
 	bottom: 0;
 	width: 100%;
+	height: 100%;
+	/* for iOS iframes */
+	-webkit-overflow-scrolling: touch;
+	overflow-y: scroll;
 }
 body[article-preview-loaded] main .archive-button,
 body[article-preview-loaded] main .close-button {
@@ -124,7 +128,7 @@ main .url-input {
 		rgba(0, 0, 0, 0) 100%
 	);
 }
-main .archived-articles {
+.archived-articles {
 	display: flex;
 	flex-wrap: wrap;
 	flex-direction: row;
@@ -138,7 +142,7 @@ main .archived-articles {
 	height: 100px;
 	background-size: cover;
 	background-repeat: no-repeat;
-	filter: sepia(1) hue-rotate(-211deg);
+	/* filter: sepia(1) hue-rotate(-211deg); */
 }
 .list-item__content {
 	padding: 15px;
@@ -169,8 +173,7 @@ body:not([article-preview-loaded]) iframe {
 iframe {
 	transition: all 450ms ease-in;
 	width: 100%;
+	height: 100%;
 	display: block;
-	overflow: scroll;
 	background: white;
-	overflow: hidden;
 }

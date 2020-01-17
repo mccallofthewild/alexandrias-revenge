@@ -14,24 +14,33 @@
 	</head>
 	<body>
 		<article>
-			<h1>${this.parsed.title}</h1>
-			<section class="details">
-				<p>Author: ${ this.parsed.author || 'unknown' }</p>
-				<p>Published: ${ this.parsed.publishedAt }</p>
-				<p>Archived: ${ this.parsed.archivedAt }</p>
-				<p>Word Count: ${ this.parsed.wordCount }</p>
-				<p>
-					Sentiment: ${ !this.parsed.afinnSentimentScore ? 'none' :
-					this.parsed.afinnSentimentScore < 2.5 ? '☹️ very negative' :
-					this.parsed.afinnSentimentScore < 5 ? '😕 negative' :
-					this.parsed.afinnSentimentScore==5 ? '😐 neutral' :
-					this.parsed.afinnSentimentScore < 7.5 ? '🙂 positive' : `😁 very
-					positive` }
-				</p>
+			<section itemprop="details">
+				<h1 itemprop="title">${this.parsed.title}</h1>
+				<p itemprop="author">${this.parsed.title}</p>
 			</section>
-			${this.parsed.content}
+			<section itemprop="content">${this.parsed.content}</section>
 			<script>
-				window.__sharedData = ${JSON.stringify(this.parsed)}
+				;(function () {
+						window.__sharedData = ${ JSON.stringify(this.parsed) };
+				})();
+			</script>
+			<script>
+				(function() {
+					function parseQuery(queryString) {
+						var query = {};
+						var pairs = (queryString[0] === '?'
+							? queryString.substr(1)
+							: queryString
+						).split('&');
+						for (var i = 0; i < pairs.length; i++) {
+							var pair = pairs[i].split('=');
+							query[decodeURIComponent(pair[0])] = decodeURIComponent(
+								pair[1] || ''
+							);
+						}
+						return query;
+					}
+				})();
 			</script>
 		</article>
 	</body>

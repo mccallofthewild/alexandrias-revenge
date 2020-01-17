@@ -19,6 +19,7 @@ import { Archive } from './@types/Archive';
 import express from 'express';
 import bodyParser from 'body-parser';
 import DataLoader from 'dataloader';
+import { ReadingTime } from './utils/ReadingTime';
 
 if (Env.NODE_ENV == 'development') {
 	const devEnv = require('../env.json');
@@ -52,19 +53,24 @@ const resolvers: {
 	[key: string]: IResolverObject<any, ContextType, any>;
 } = {
 	ParseResult: {
+		readingTimeInMs(parent) {
+			if (!parent.readingTimeInMs) {
+				return ReaderService.analyzeHtmlText(parent.content).readingTimeInMs;
+			}
+			return parent.readingTimeInMs;
+		},
 		humanReadableSentiment(parent) {
 			return !parent.afinnSentimentScore
 				? 'none'
-				: parent.afinnSentimentScore < 2.5
-				? '☹️ very negative'
-				: parent.afinnSentimentScore < 5
-				? '😕 negative'
-				: parent.afinnSentimentScore == 5
-				? '😐 neutral'
-				: parent.afinnSentimentScore < 7.5
-				? '🙂 positive'
-				: `😁 very
-					positive`;
+				: parent.afinnSentimentScore < -50
+				? '☹️ Very Gloomy'
+				: parent.afinnSentimentScore < -25
+				? '😕 Unhappy'
+				: parent.afinnSentimentScore < 25
+				? '😐 Alright'
+				: parent.afinnSentimentScore < 50
+				? '🙂 Happy'
+				: `😁 Wonderful`;
 		}
 	},
 	Query: {

@@ -27,12 +27,23 @@ const parsedSiteLoader = new DataLoader<string, Mercury.ParseResult>(
 	}
 );
 export class ReaderService {
+	static analyzeHtmlText(html: string = '') {
+		const $ = cheerio.load(html);
+		const text = $.root().text();
+		return {
+			get afinnSentimentScore() {
+				return sentiment.analyze(text).score;
+			},
+			get readingTimeInMs() {
+				return ReadingTime.calculate(text).time;
+			}
+		};
+	}
 	static async parse(url: string): Promise<Archive.Article> {
 		const parsed = await parsedSiteLoader.load(url);
-		const $ = cheerio.load(parsed.content || '');
-		const text = $.root().text();
-		const afinnSentimentScore = sentiment.analyze(text).score;
-		const readingTimeInMs = ReadingTime.calculate(text).time;
+		const { afinnSentimentScore, readingTimeInMs } = this.analyzeHtmlText(
+			parsed.content || ''
+		);
 		return {
 			type: 'Article',
 			content: parsed.content || '',
