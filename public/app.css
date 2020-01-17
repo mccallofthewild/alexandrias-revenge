@@ -17,6 +17,10 @@ body {
 	min-width: 100vw;
 	font-family: monospace;
 }
+* {
+	z-index: 1;
+	position: relative;
+}
 button {
 	cursor: pointer;
 }
@@ -27,6 +31,19 @@ main {
 	padding-top: 100px;
 	height: 100vh;
 	width: 100vw;
+}
+@keyframes slideInUp {
+	from {
+		opacity: 0;
+		transform: translateY(20px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0px);
+	}
+}
+.animate.slideInUp {
+	animation: slideInUp 1s ease-out;
 }
 main .logo {
 	max-height: 200px;
@@ -40,6 +57,7 @@ main .subtitle {
 }
 main .archive-form-area {
 	position: relative;
+	z-index: 2;
 }
 body[article-preview-loaded] main .archive-form-area {
 	position: fixed;
@@ -150,6 +168,8 @@ body:not([article-preview-loaded]) iframe {
 iframe {
 	transition: all 450ms ease-in;
 	width: 100%;
+	display: block;
 	overflow: scroll;
 	background: white;
+	overflow: hidden;
 }
