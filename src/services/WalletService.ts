@@ -9,49 +9,90 @@ import { UltraArQL } from '../utils/UltraArQL';
 export class WalletService {
 	private static ALGORITHM = 'aes-256-ctr';
 
-	private static async loadRemoteWalletFromPermaweb() {
-		const wallet = await PermawebService.search({});
+	private static async loadRemoteWalletFromPermaweb(): Promise<JWKInterface> {
+		const wallets = await PermawebService.search({
+			walletIdentifier: Env.HEROKU_DYNAMIC_WALLET_IDENTIFIER
+		});
+		const wallet = wallets.pop();
+		if (!wallet) {
+			throw new Error('Failed to load remote wallet from permaweb.');
+		}
+		return (wallet.__data as unknown) as JWKInterface;
 	}
-	private static async createDynamicWallet() {
+	private static async createRemoteWallet() {
 		if (
 			!(
 				Env.HEROKU_TRUSTED_PEER_URI &&
 				Env.HEROKU_DYNAMIC_WALLET_IDENTIFIER &&
 				Env.HEROKU_DYNAMIC_WALLET_SECRET
 			)
-		)
-			return;
-		const graphql = GraphQL.createRequester(Env.HEROKU_TRUSTED_PEER_URI);
-		try {
-			const wallet = await PermawebService.arweave.wallets.generate();
-			const stringifiedWallet = JSON.stringify(wallet);
-			const encryptedWallet = this.encrypt(
-				Buffer.from(stringifiedWallet, 'utf8'),
-				Env.HEROKU_DYNAMIC_WALLET_SECRET
+		) {
+			throw new Error(
+				'Environment variables not configured for remote wallet creation.'
 			);
-			const { walletTxId } = await graphql`
-				mutation publishEncryptedWalletForPeer(
-					$encryptedWalletJWK: String!
-					$walletIdentifier: ID!
-				) {
-					walletTxId: publishEncryptedWalletForPeer(
-						encryptedWalletJWK: $encryptedWalletJWK
-						walletIdentifier: $walletIdentifier
-					)
-				}
-			`({
-				encryptedWalletJWK: encryptedWallet,
-				walletIdentifier: Env.HEROKU_DYNAMIC_WALLET_IDENTIFIER
-			});
-		} catch (e) {}
+		}
+		const graphql = GraphQL.createRequester(Env.HEROKU_TRUSTED_PEER_URI);
+		const wallet = await PermawebService.arweave.wallets.generate();
+		const stringifiedWallet = JSON.stringify(wallet);
+		const encryptedWallet = this.encrypt(
+			Buffer.from(stringifiedWallet, 'utf8'),
+			Env.HEROKU_DYNAMIC_WALLET_SECRET
+		);
+		const { walletTxId } = await graphql`
+			mutation publishEncryptedWalletForPeer(
+				$encryptedWalletJWK: String!
+				$walletIdentifier: ID!
+			) {
+				walletTxId: publishEncryptedWalletForPeer(
+					encryptedWalletJWK: $encryptedWalletJWK
+					walletIdentifier: $walletIdentifier
+				)
+			}
+		`({
+			encryptedWalletJWK: encryptedWallet,
+			walletIdentifier: Env.HEROKU_DYNAMIC_WALLET_IDENTIFIER
+		});
+		return walletTxId as string;
 	}
-	static async loadWallet(): Promise<JWKInterface> {
+
+	static async loadWalletFromFile(): Promise<JWKInterface> {
 		const jsonString = this.decryptFile(
 			Files.ENCRYPTED_WALLET_PATH,
 			Env.WALLET_FILE_SECRET
 		);
-		const wallet = JSON.parse(jsonString);
-		return wallet;
+		return (JSON.parse(jsonString) as unknown) as JWKInterface;
+	}
+	static async loadWallet(): Promise<JWKInterface> {
+		const _loadWallet = async () => {
+			try {
+				let wallet = await this.loadWalletFromFile();
+				return wallet;
+			} catch (e) {}
+			try {
+				let wallet = await this.loadRemoteWalletFromPermaweb();
+				if (wallet) return wallet;
+			} catch (e) {}
+			const txId = await this.createRemoteWallet();
+			const startTime = Date.now();
+			while (true) {
+				if (Date.now() - startTime > 30 * 60 * 1000) break;
+				await new Promise(r => setTimeout(r, 20000));
+				const status = await PermawebService.getHumanReadableTransactionStatus(
+					txId
+				);
+				if (status == 'SUCCESS') {
+					let wallet = await this.loadRemoteWalletFromPermaweb();
+					if (wallet) return wallet;
+				}
+				throw new Error('failed to create wallet');
+			}
+		};
+		const wallet = await _loadWallet();
+		if (wallet) {
+			this.loadWallet = () => Promise.resolve(wallet);
+			return wallet;
+		}
+		throw new Error('failed to load wallet');
 	}
 	static encryptFile(
 		inputFilePath: string,

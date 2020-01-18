@@ -8,6 +8,7 @@ import { Archive } from '../@types/Archive';
 import Sentiment from 'sentiment';
 import { ReadingTime } from '../utils/ReadingTime';
 import DataLoader from 'dataloader';
+
 const sentiment = new Sentiment();
 const parsedSiteLoader = new DataLoader<string, Mercury.ParseResult>(
 	async function batchFunction(urls: readonly string[]) {

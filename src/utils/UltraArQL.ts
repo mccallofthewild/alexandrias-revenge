@@ -1,13 +1,28 @@
 type Primitive = string | number | boolean | null | undefined;
-export type UltraArQLQuery = {
-	[key: string]: Primitive;
-} & {
+export interface UltraArQLQuery {
 	AND?: UltraArQLQuery[];
 	OR?: UltraArQLQuery[];
-};
-type RecursiveUltrArQLQuery = UltraArQLQuery | Primitive;
+	[key: string]: Primitive | UltraArQLQuery[];
+}
+
+type ArQLOperator = 'equals' | 'and' | 'or';
+
+interface AndOrArQLQuery {
+	op: 'and' | 'or';
+	expr1: ArQLQuery;
+	expr2: ArQLQuery;
+}
+type ArQLQuery =
+	| {
+			op: 'equals';
+			expr1: Primitive;
+			expr2: Primitive;
+	  }
+	| AndOrArQLQuery;
+
+type RecursiveUltrArQLQuery = UltraArQLQuery | Primitive | Array<UltraArQL>;
 export class UltraArQL {
-	static objToArql(obj: RecursiveUltrArQLQuery) {
+	static objToArql(obj: RecursiveUltrArQLQuery): RecursiveUltrArQLQuery {
 		// (recursive call) process filter values
 		if (typeof obj != 'object' || obj == null || obj instanceof Array) {
 			return obj;
@@ -18,7 +33,7 @@ export class UltraArQL {
 		});
 
 		// turn top level queries into flat array of queries and recursively process sub-queries
-		const queries = entries.map(([prop, val]) => {
+		const queries: RecursiveUltrArQLQuery[] = entries.map(([prop, val]) => {
 			/*
         when OR statement, need to take this:
         OR: [{id: 1}, {id: 2}, {id: 3}, {id: 4}, {id: 5}]
@@ -29,7 +44,7 @@ export class UltraArQL {
 					filter => this.objToArql(filter)
 				);
 				return this.buildArqlTree(logicalQueries, {
-					operator: prop.toLowerCase()
+					operator: prop.toLowerCase() as ArQLOperator
 				});
 			}
 			return {
@@ -43,13 +58,14 @@ export class UltraArQL {
 
 	static buildArqlTree(
 		queries: RecursiveUltrArQLQuery[],
-		{ operator = 'and' } = {}
+		{ operator = 'and' }: { operator?: ArQLOperator } = {}
 	) {
 		// because arql queries are limited to two parameters, every query
 		const depth = Math.ceil(queries.length ** (1 / 2));
-		const buildTree = (currentDepth = 0) => {
+		const buildTree = (currentDepth = 0): ArQLQuery => {
 			const nextDepth = currentDepth + 1;
-			let expr1, expr2;
+			type Expression = ArQLQuery | undefined;
+			let expr1: Expression, expr2: Expression;
 			if (nextDepth == depth || queries.length <= 2) {
 				expr1 = queries.pop();
 				expr2 = queries.pop();

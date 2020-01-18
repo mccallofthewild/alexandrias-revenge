@@ -16,28 +16,37 @@ const arweave = Arweave.init({
 const txDataLoader = new DataLoader<string, Transaction>(async ids => {
 	return await Promise.all(ids.map(id => arweave.transactions.get(id)));
 });
+const DefaultTags = {
+	'App-Name': 'AlexandriasRevenge',
+	'App-Version': '1.0.0'
+};
 export class PermawebService {
 	static arweave = arweave;
 	loadWallet: () => Promise<JWKInterface>;
 	constructor({ loadWallet }: { loadWallet: () => Promise<JWKInterface> }) {
 		this.loadWallet = loadWallet;
 	}
-	private DefaultTags = {
-		'App-Name': 'AlexandriasRevenge',
-		'App-Version': '1.0.0'
-	};
 
 	static async search(query: UltraArQLQuery) {
 		const txIds = await arweave.arql(
 			UltraArQL.objToArql({
 				...query,
-				'App-Name': this.DefaultTags['App-Name']
+				'App-Name': DefaultTags['App-Name']
 			})
 		);
 		const txs = await Promise.all(txIds.map(id => txDataLoader.load(id)));
 		const objectsFromTx = txs.map(tx => {
 			return {
 				...this.tagsToProps(tx.tags),
+				__data: tx.data
+					? (() => {
+							let data = tx.get('data', { decode: true, string: true });
+							try {
+								return JSON.parse(data);
+							} catch (e) {}
+							return data;
+					  })()
+					: null,
 				__transaction: tx
 			};
 		});
@@ -70,7 +79,7 @@ export class PermawebService {
 		});
 	}
 
-	private static tagsToProps(tags: Tag[]) {
+	private static tagsToProps(tags: Tag[]): { [key: string]: any } {
 		const entries = tags.map(tag => {
 			const name = tag.get('name', { decode: true, string: true });
 			let value = PermawebService.getVal(tag);
@@ -92,7 +101,7 @@ export class PermawebService {
 			await this.loadWallet()
 		);
 		this.addTags(tx, {
-			...this.DefaultTags,
+			...DefaultTags,
 			'Content-Type': res.headers.get('Content-Type') || 'image'
 		});
 		const signedTx = await arweave.transactions.sign(
@@ -121,7 +130,7 @@ export class PermawebService {
 		this.addTags(tx, {
 			...txDraft.tags,
 			'Content-Type': txDraft.contentType,
-			...this.DefaultTags
+			...DefaultTags
 		});
 		await arweave.transactions.sign(tx, await this.loadWallet());
 		const txData = await arweave.transactions.post(tx);
@@ -150,7 +159,7 @@ export class PermawebService {
 		this.addTags(tx, {
 			...tagData,
 			'Content-Type': 'text/html',
-			...this.DefaultTags
+			...DefaultTags
 		});
 		await arweave.transactions.sign(tx, await this.loadWallet());
 		const txData = await arweave.transactions.post(tx);
@@ -171,7 +180,9 @@ export class PermawebService {
 		return val;
 	}
 	txToArticle(tx: Transaction): Archive.Article {
-		const article = PermawebService.tagsToProps(tx.tags);
+		const article: Archive.Article = PermawebService.tagsToProps(
+			tx.tags
+		) as Archive.Article;
 		article.id = tx.id;
 		article.content = tx.get('data', { decode: true, string: true });
 		return article;
@@ -181,7 +192,7 @@ export class PermawebService {
 		const query = UltraArQL.objToArql({
 			// 'Content-Type': 'text/html'
 			type: 'Article',
-			'App-Name': this.DefaultTags['App-Name']
+			'App-Name': DefaultTags['App-Name']
 		});
 		const txIds = await arweave.arql(query);
 		const txs = await Promise.all(txIds.map(id => txDataLoader.load(id)));

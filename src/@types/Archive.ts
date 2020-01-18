@@ -1,5 +1,6 @@
 export declare namespace Archive {
 	export interface Media {
+		id?: string;
 		type: 'Article' | 'Image';
 		originUrl: string;
 		archivedAt: string;

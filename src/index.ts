@@ -134,9 +134,10 @@ const resolvers: {
 		) {
 			const tx = await permawebService.publish({
 				tags: {
-					walletId: walletIdentifier
+					walletIdentifier: walletIdentifier
 				},
-				data: encryptedWalletJWK
+				data: encryptedWalletJWK,
+				contentType: 'application/json'
 			});
 			return tx.id;
 		},
