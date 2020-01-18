@@ -32,8 +32,15 @@ if (Env.NODE_ENV == 'development' && fs.existsSync(Files.WALLET_PATH)) {
 	WalletService.encryptFile(Files.WALLET_PATH, Files.ENCRYPTED_WALLET_PATH);
 }
 
+const logArticle = ({ ...article }) => {
+	delete article.content;
+	console.log(article);
+};
+
 const permawebService = new PermawebService({
-	wallet: JSON.parse(WalletService.decryptFile(Files.ENCRYPTED_WALLET_PATH))
+	async loadWallet() {
+		return WalletService.loadWallet();
+	}
 });
 
 // permawebService
@@ -61,7 +68,7 @@ const resolvers: {
 		},
 		humanReadableSentiment(parent) {
 			return !parent.afinnSentimentScore
-				? 'none'
+				? 'Unclear'
 				: parent.afinnSentimentScore < -50
 				? '☹️ Very Gloomy'
 				: parent.afinnSentimentScore < -25
@@ -73,7 +80,30 @@ const resolvers: {
 				: `😁 Wonderful`;
 		}
 	},
+	WalletInfo: {
+		async balance(parent) {
+			const winstonBalance = await PermawebService.arweave.wallets.getBalance(
+				parent.address
+			);
+			return {
+				ar: PermawebService.arweave.ar.winstonToAr(winstonBalance),
+				winston: winstonBalance
+			};
+		}
+	},
 	Query: {
+		async donationWallet() {
+			const address = await PermawebService.arweave.wallets.jwkToAddress(
+				await permawebService.loadWallet()
+			);
+			return { address };
+		},
+		async usageAnalytics() {
+			const { transactions } = await permawebService.loadAllArticles();
+			return {
+				articleCount: transactions.length
+			};
+		},
 		async archivePreview(
 			parent,
 			{ parseResult: parsed }: { parseResult: Archive.Article }
@@ -81,26 +111,35 @@ const resolvers: {
 			return ReaderService.renderPageFromTemplate(parsed);
 		},
 		async archivePublishStatus(parent, { txId }: { txId: string }) {
-			const txInfo = await PermawebService.arweave.transactions.getStatus(txId);
-			if (txInfo.status.toString().startsWith('2')) {
-				if (txInfo.confirmed) {
-					return 'SUCCESS';
-				}
-				return 'PENDING';
-			}
-			return txInfo.status == 404 ? 'PENDING' : 'FAILED';
+			return await PermawebService.getHumanReadableTransactionStatus(txId);
 		},
 		async walletDonationAddress() {
 			const address = await PermawebService.arweave.wallets.jwkToAddress(
-				permawebService.wallet
+				await permawebService.loadWallet()
 			);
 			return address;
 		},
 		async archivedArticles() {
-			return await permawebService.loadAllArticles();
+			const { articles } = await permawebService.loadAllArticles();
+			return articles;
 		}
 	},
 	Mutation: {
+		async publishEncryptedWalletForPeer(
+			parent,
+			{
+				encryptedWalletJWK,
+				walletIdentifier
+			}: { encryptedWalletJWK: string; walletIdentifier: string }
+		) {
+			const tx = await permawebService.publish({
+				tags: {
+					walletId: walletIdentifier
+				},
+				data: encryptedWalletJWK
+			});
+			return tx.id;
+		},
 		async scrapeWebsite(parent, { url }, ctx) {
 			const parsed = await ReaderService.parse(url);
 			return parsed;
@@ -110,8 +149,9 @@ const resolvers: {
 			{ parseResult: parsed }: { parseResult: Archive.Article },
 			ctx
 		) {
-			const txId = await permawebService.publishArticle(parsed);
-			return txId;
+			const article = await permawebService.publishArticle(parsed);
+			logArticle(article);
+			return article;
 		}
 	}
 };
@@ -147,8 +187,6 @@ app.use(
 app.use(bodyParser.json({ limit: '50mb' }));
 
 app.get('/preview', async (req, res) => {
-	console.log('getting preview');
-	console.log(req.query);
 	res.send(
 		await ReaderService.renderPageFromTemplate(
 			await ReaderService.parse(req.query.url)

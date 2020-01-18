@@ -1,8 +1,25 @@
 {
 	"name": "Alexandria's Revenge",
-	"description": "A ready-to-go, full stack and decentralized web archive built on Arweave.",
+	"description": "A ready-to-go, full stack, and decentralized web archive built on Arweave.",
 	"repository": "https://github.com/mccallofthewild/alexandrias-revenge",
 	"logo": "https://github.com/mccallofthewild/alexandrias-revenge/raw/master/docs/logo.svg?sanitize=true",
 	"keywords": ["arweave", "blockchain", "archive"],
-	"website": "https://small-sharp-tool.com/"
+	"website": "https://small-sharp-tool.com/",
+	"env": {
+		"HEROKU_DYNAMIC_WALLET_IDENTIFIER": {
+			"description": "A key to find your encrypted wallet on the Arweave network.",
+			"generator": "secret"
+		},
+		"HEROKU_DYNAMIC_WALLET_SECRET": {
+			"description": "A secret key for encrypting your dynamic wallet on the Arweave network.",
+			"generator": "secret"
+		},
+		"NODE_ENV": {
+			"description": "Production environment identifier.",
+			"value": "production"
+		},
+		"HEROKU_TRUSTED_PEER_URI": {
+			"value": "https://alexandriasrevenge.herokuapp.com"
+		}
+	}
 }

@@ -3,11 +3,31 @@ type Query {
 	archivePublishStatus(txId: ID!): PublishStatus!
 	walletDonationAddress: String!
 	archivedArticles: [ParseResult!]!
+	usageAnalytics: UsageAnalytics!
+	donationWallet: WalletInfo!
 }
 
 type Mutation {
+	publishEncryptedWalletForPeer(
+		encryptedWalletJWK: String!
+		walletIdentifier: ID!
+	): String! # Permalink TxId For Encrypted Wallet File
 	scrapeWebsite(url: String!): ParseResult!
-	publishArchive(parseResult: ParseResultInput!): String! # Permalink (or just the site URL bc it could take a while and you'll have the socket results coming through)
+	publishArchive(parseResult: ParseResultInput!): ParseResult! # Permalink (or just the site URL bc it could take a while and you'll have the socket results coming through)
+}
+
+type WalletInfo {
+	address: String!
+	balance: WalletBalance!
+}
+
+type WalletBalance {
+	ar: String!
+	winston: String!
+}
+
+type UsageAnalytics {
+	articleCount: Int!
 }
 
 enum ParseResultDirection {
@@ -34,8 +54,8 @@ type ParseResult {
 	heroImageUrl: String
 	afinnSentimentScore: Float!
 	readingTimeInMs: Float
-	originUrl: String!
-	archivedAt: String!
+	originUrl: String
+	archivedAt: String
 	#computed
 	humanReadableSentiment: String!
 }

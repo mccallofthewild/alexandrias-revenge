@@ -11,6 +11,32 @@
 		<meta property="og:type" content="website" />
 		<meta property="og:image" content="${this.parsed.heroImageUrl}" />
 		<!-- OpenGraph End -->
+		<!-- JSON-LD Start -->
+		<script type="application/ld+json">
+			{
+				"@context": "http://schema.org/",
+				"@type": "NewsArticle",
+				"headline": "${escape(this.parsed.title || '')}",
+				"datePublished": "${`${new Date(this.parsed.publishedAt).getUTCFullYear()}-${new Date(this.parsed.publishedAt).getUTCMonth() < 9 ? '0' + (new Date(this.parsed.publishedAt).getUTCMonth() + 1) : new Date(this.parsed.publishedAt).getUTCMonth() + 1  }-${new Date(this.parsed.publishedAt).getUTCDate()}`}",
+				"description": "${escape(this.parsed.sample || '')}",
+				"image": {
+					"@type": "ImageObject",
+					"height": "",
+					"width": "",
+					"url": "${this.parsed.heroImageUrl}"
+				},
+				"author": "${escape(this.parsed.author || '')}",
+				"publisher": {
+					"@type": "Organization",
+					"logo": {
+						"@type": "ImageObject",
+						"url": ""
+					},
+					"name": "Arweave Permaweb"
+				}
+			}
+		</script>
+		<!-- JSON-LD End -->
 	</head>
 	<body>
 		<article>

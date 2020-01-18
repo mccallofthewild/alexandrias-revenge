@@ -1,38 +1,96 @@
 import crypto from 'crypto';
 import { Env } from '../constants/Env';
 import fs from 'fs';
+import { Files } from '../constants/Files';
+import { JWKInterface } from 'arweave/node/lib/wallet';
+import { GraphQL } from '../utils/GraphQL';
+import { PermawebService } from './PermawebService';
+import { UltraArQL } from '../utils/UltraArQL';
 export class WalletService {
 	private static ALGORITHM = 'aes-256-ctr';
-	static encryptFile(inputFilePath: string, outputFilePath?: string) {
+
+	private static async loadRemoteWalletFromPermaweb() {
+		const wallet = await PermawebService.search({});
+	}
+	private static async createDynamicWallet() {
+		if (
+			!(
+				Env.HEROKU_TRUSTED_PEER_URI &&
+				Env.HEROKU_DYNAMIC_WALLET_IDENTIFIER &&
+				Env.HEROKU_DYNAMIC_WALLET_SECRET
+			)
+		)
+			return;
+		const graphql = GraphQL.createRequester(Env.HEROKU_TRUSTED_PEER_URI);
+		try {
+			const wallet = await PermawebService.arweave.wallets.generate();
+			const stringifiedWallet = JSON.stringify(wallet);
+			const encryptedWallet = this.encrypt(
+				Buffer.from(stringifiedWallet, 'utf8'),
+				Env.HEROKU_DYNAMIC_WALLET_SECRET
+			);
+			const { walletTxId } = await graphql`
+				mutation publishEncryptedWalletForPeer(
+					$encryptedWalletJWK: String!
+					$walletIdentifier: ID!
+				) {
+					walletTxId: publishEncryptedWalletForPeer(
+						encryptedWalletJWK: $encryptedWalletJWK
+						walletIdentifier: $walletIdentifier
+					)
+				}
+			`({
+				encryptedWalletJWK: encryptedWallet,
+				walletIdentifier: Env.HEROKU_DYNAMIC_WALLET_IDENTIFIER
+			});
+		} catch (e) {}
+	}
+	static async loadWallet(): Promise<JWKInterface> {
+		const jsonString = this.decryptFile(
+			Files.ENCRYPTED_WALLET_PATH,
+			Env.WALLET_FILE_SECRET
+		);
+		const wallet = JSON.parse(jsonString);
+		return wallet;
+	}
+	static encryptFile(
+		inputFilePath: string,
+		password: string,
+		outputFilePath?: string
+	): Buffer {
 		const buffer = fs.readFileSync(inputFilePath);
-		const encryptedBuffer = this.encrypt(buffer);
+		const encryptedBuffer = this.encrypt(buffer, password);
 		if (outputFilePath) fs.writeFileSync(outputFilePath, encryptedBuffer);
 		return encryptedBuffer;
 	}
 
-	static decryptFile(filePath: string) {
+	private static decryptFile(filePath: string, password: string): string {
 		const buffer = fs.readFileSync(filePath);
-		const decryptedBuffer = this.decrypt(buffer);
+		const decryptedBuffer = this.decrypt(buffer, password);
 		return decryptedBuffer.toString();
 	}
-	static createKey() {
+	private static createKey(secret: string): string {
 		return crypto
 			.createHash('sha256')
-			.update(Env.WALLET_FILE_SECRET)
+			.update(secret)
 			.digest('base64')
 			.substr(0, 32);
 	}
-	static encrypt(buffer: Buffer) {
+	private static encrypt(buffer: Buffer, password: string): Buffer {
 		// Create an initialization vector
 		const iv = crypto.randomBytes(16);
 		// Create a new cipher using the algorithm, key, and iv
-		const cipher = crypto.createCipheriv(this.ALGORITHM, this.createKey(), iv);
+		const cipher = crypto.createCipheriv(
+			this.ALGORITHM,
+			this.createKey(password),
+			iv
+		);
 		// Create the new (encrypted) buffer
 		const result = Buffer.concat([iv, cipher.update(buffer), cipher.final()]);
 		return result;
 	}
 
-	static decrypt(encrypted: Buffer) {
+	private static decrypt(encrypted: Buffer, password: string): Buffer {
 		// Get the iv: the first 16 bytes
 		const iv = encrypted.slice(0, 16);
 		// Get the rest
@@ -40,7 +98,7 @@ export class WalletService {
 		// Create a decipher
 		const decipher = crypto.createDecipheriv(
 			this.ALGORITHM,
-			this.createKey(),
+			this.createKey(password),
 			iv
 		);
 		// Actually decrypt it
