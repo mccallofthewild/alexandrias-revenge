@@ -15,6 +15,7 @@
 			"generator": "secret"
 		},
 		"TEMPLATE_DEPLOY_TRUSTED_PEER_URI": {
+			"description": "A friendly peer server to upload your encrypted wallet file to the Arweave network. (Do not change unless you know what you're doing)",
 			"value": "https://alexandriasrevenge.herokuapp.com"
 		},
 		"NODE_ENV": {
