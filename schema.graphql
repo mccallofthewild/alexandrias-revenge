@@ -4,7 +4,7 @@ type Query {
 	walletDonationAddress: String!
 	archivedArticles: [ParseResult!]!
 	usageAnalytics: UsageAnalytics!
-	donationWallet: WalletInfo!
+	donationWallet: WalletInfo
 }
 
 type Mutation {

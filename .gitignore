@@ -13,6 +13,8 @@ env.json
 lib
 
 wallet.json
+# For testing without wallet file
+ignore.wallet.json
 
 # yarn.lock works better with heroku, but npm works better for typescript development
 package-lock.json

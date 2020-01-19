@@ -5,14 +5,14 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<meta http-equiv="X-UA-Compatible" content="ie=edge" />
 		<title>Alexandria's Revenge</title>
-		<link rel="stylesheet" href="/app.css?v=2" />
+		<link rel="stylesheet" href="/app.css?v=3" />
 	</head>
 	<body>
 		<main>
 			<p style="color: white; font-family: monospace;">
-				<span id="donation-wallet"></span>
+				<span id="donation-wallet">Loading wallet...</span>
 				&nbsp;|&nbsp;
-				<span id="analytics"></span>
+				<span id="analytics">Loading analytics...</span>
 			</p>
 			<img src="logo.svg" alt="logo" height="33%" class="logo" />
 			<p class="subtitle">
@@ -47,7 +47,9 @@
 				</button>
 			</div>
 			<div>
-				<ul id="archived-articles" class="archived-articles"></ul>
+				<ul id="archived-articles" class="archived-articles">
+					<span style="color: white;">loading articles...</span>
+				</ul>
 			</div>
 			<section style="color: white; font-size: 1.25em;">
 				<h2>Inspiration</h2>
@@ -67,6 +69,6 @@
 				</p>
 			</section>
 		</main>
-		<script src="/app.js?v=2"></script>
+		<script src="/app.js?v=3"></script>
 	</body>
 </html>

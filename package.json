@@ -3,6 +3,9 @@
 	"license": "UNLICENSED",
 	"name": "permalink-web-archive",
 	"version": "1.0.0",
+	"engines": {
+		"node": "12.10.0"
+	},
 	"description": "An Arweave Permalink Web Archive Tool",
 	"main": "lib/index.js",
 	"scripts": {
@@ -14,12 +17,13 @@
 		"build:types": "tsc --emitDeclarationOnly",
 		"build:js": "babel src --out-dir lib --extensions \".ts,.tsx,.js,.jsx\"",
 		"dev": "NODE_ENV=development babel-watch ./src/index.ts -w ./schema.graphql --extensions \".ts,.tsx,.js,.jsx\" --source-maps inline",
-		"test": "jest",
+		"test": "jest --watch",
 		"deploy": "yarn && git add -A && git commit -am 'deploying' && git push origin master"
 	},
 	"dependencies": {
 		"@postlight/mercury-parser": "^2.2.0",
 		"@types/cheerio": "^0.22.15",
+		"@types/jest": "^24.9.0",
 		"@types/postlight__mercury-parser": "^2.2.2",
 		"apollo-server-express": "^2.9.16",
 		"arweave": "^1.6.0",

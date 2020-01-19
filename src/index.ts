@@ -20,33 +20,43 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import DataLoader from 'dataloader';
 import { ReadingTime } from './utils/ReadingTime';
+import { Encrypt } from './utils/Encrypt';
+import { JWKInterface } from 'arweave/node/lib/wallet';
+const packageJSON = require('../package.json');
 
 if (Env.NODE_ENV == 'development') {
-	const devEnv = require('../env.json');
-	for (let prop in devEnv) {
-		process.env[prop] = devEnv[prop];
+	if (fs.existsSync(path.join(__dirname, '../env.json'))) {
+		const devEnv = require('../env.json');
+		for (let prop in devEnv) {
+			process.env[prop] = devEnv[prop];
+		}
+	} else {
+		console.log(
+			`An env.json file is recommended for local development. \n\ See README.md for more information.`
+		);
 	}
-}
-
-if (Env.NODE_ENV == 'development' && fs.existsSync(Files.WALLET_PATH)) {
-	WalletService.encryptFile(Files.WALLET_PATH, Files.ENCRYPTED_WALLET_PATH);
+	let didUpdateWalletFile = false;
+	try {
+		didUpdateWalletFile = WalletService.updateEncryptedWalletFile();
+	} catch (e) {}
+	if (!didUpdateWalletFile) {
+		console.log(
+			`A wallet.json file is recommended for local development. \n\ See README.md for more information.`
+		);
+	}
 }
 
 const logArticle = ({ ...article }) => {
 	delete article.content;
-	console.log(article);
 };
 
+WalletService.loadWallet().catch(console.error);
 const permawebService = new PermawebService({
 	async loadWallet() {
 		return WalletService.loadWallet();
 	}
 });
 
-// permawebService
-// 	.loadAllArticles()
-// 	.then(console.log)
-// 	.catch(console.error);
 // A schema is a collection of type definitions (hence "typeDefs")
 // that together define the "shape" of queries that are executed against
 // your data.
@@ -93,8 +103,26 @@ const resolvers: {
 	},
 	Query: {
 		async donationWallet() {
+			let wallet: JWKInterface | undefined;
+			await new Promise(r => {
+				let timeout = setTimeout(() => {
+					if (!wallet) r();
+				}, 3000);
+				permawebService
+					.loadWallet()
+					.then(walletJWK => {
+						clearTimeout(timeout);
+						r();
+						wallet = walletJWK;
+					})
+					.catch(console.error);
+			});
+			if (!wallet) {
+				console.log('has not loaded wallet!');
+				return null;
+			}
 			const address = await PermawebService.arweave.wallets.jwkToAddress(
-				await permawebService.loadWallet()
+				wallet
 			);
 			return { address };
 		},
@@ -136,8 +164,7 @@ const resolvers: {
 				tags: {
 					walletIdentifier: walletIdentifier
 				},
-				data: encryptedWalletJWK,
-				contentType: 'application/json'
+				data: encryptedWalletJWK
 			});
 			return tx.id;
 		},

@@ -350,7 +350,9 @@
 				}
 			}
 		`();
-		refs.donationWalletEl.innerHTML = `Donate: ${donationWallet.address} | Balance: ${donationWallet.balance.ar} AR`;
+		refs.donationWalletEl.innerHTML = donationWallet
+			? `Donate: ${donationWallet.address} | Balance: ${donationWallet.balance.ar} AR`
+			: `Wallet not yet configured. Please wait a minute then reload.`;
 		refs.analyticsEl.innerHTML = `${usageAnalytics.articleCount} Permanently Stored`;
 	}
 	init();

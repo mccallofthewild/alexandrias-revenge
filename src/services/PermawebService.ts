@@ -24,7 +24,13 @@ export class PermawebService {
 	static arweave = arweave;
 	loadWallet: () => Promise<JWKInterface>;
 	constructor({ loadWallet }: { loadWallet: () => Promise<JWKInterface> }) {
-		this.loadWallet = loadWallet;
+		this.loadWallet = async () => {
+			const wallet = await loadWallet();
+			if (wallet) {
+				this.loadWallet = () => Promise.resolve(wallet);
+			}
+			return wallet;
+		};
 	}
 
 	static async search(query: UltraArQLQuery) {
@@ -42,7 +48,8 @@ export class PermawebService {
 					? (() => {
 							let data = tx.get('data', { decode: true, string: true });
 							try {
-								return JSON.parse(data);
+								data = JSON.parse(data);
+								return data;
 							} catch (e) {}
 							return data;
 					  })()

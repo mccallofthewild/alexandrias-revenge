@@ -6,20 +6,20 @@
 	"keywords": ["arweave", "blockchain", "archive"],
 	"website": "https://small-sharp-tool.com/",
 	"env": {
-		"HEROKU_DYNAMIC_WALLET_IDENTIFIER": {
+		"TEMPLATE_DEPLOY_DYNAMIC_WALLET_IDENTIFIER": {
 			"description": "A key to find your encrypted wallet on the Arweave network.",
 			"generator": "secret"
 		},
-		"HEROKU_DYNAMIC_WALLET_SECRET": {
+		"TEMPLATE_DEPLOY_DYNAMIC_WALLET_SECRET": {
 			"description": "A secret key for encrypting your dynamic wallet on the Arweave network.",
 			"generator": "secret"
+		},
+		"TEMPLATE_DEPLOY_TRUSTED_PEER_URI": {
+			"value": "https://alexandriasrevenge.herokuapp.com"
 		},
 		"NODE_ENV": {
 			"description": "Production environment identifier.",
 			"value": "production"
-		},
-		"HEROKU_TRUSTED_PEER_URI": {
-			"value": "https://alexandriasrevenge.herokuapp.com"
 		}
 	}
 }
