@@ -22,7 +22,9 @@ The Great Library of Alexandria in Alexandria, Egypt, was one of the largest and
 	* Archive Metadata
 		* OpenGraph
 		* JSON-LD
-	
+* Wallet Management
+	* Auto-Wallet: To enable one-step deployment ([see below](#-fast-track)), wallets are dynamically generated, then encrypted with a password. Along with a secret identifier tag, the encrypted wallet is then sent to a peer Alexandria's Revenge node. The peer node donates its own AR tokens to permanently store the wallet on the Arweave network. Once the storage is complete, the wallet can be found by its secret identifier tag, downloaded from the Arweave network, and decrypted for use. Importantly, the stored wallet can not be traced back to its address.
+	* Custom: By placing a `wallet.json` file in the root directory and setting a password, an custom wallet can be specified and securely uploaded to the server. ([see below](#-configure-wallet))
 
 # 🚀 Usage & Deployment
 ## 🏎 Fast Track
@@ -36,11 +38,11 @@ The Great Library of Alexandria in Alexandria, Egypt, was one of the largest and
 </p>
 
 2. Configure your `App name` 
-3. Scroll down and click `Deploy App`. Wait while heroku builds the app. 
+3. Scroll down and click `Deploy App`. Wait while Heroku builds the app. 
 4. Click `↗️ View` to open your new `Alexandrias Revenge` node. 
 5. Wait ~1-30 minutes while your wallet is generated, encrypted, and permanently stored on the blockweave.
 6. Once your wallet is provisioned, reload the app. Your new wallet address appears at the top of the screen after `Donate:`. 
-7. As is, this node will be able to *download* archived files. However, you will need to send some AR (Arweave tokens) to the address in order to upload/archive new websites.
+7. As is, this node will be able to *download* archived files. However, you will need to send some AR (Arweave tokens) to the address in order to archive new websites.
 8. 🏁🏁🏁🏁🏁🏁🏁🏁
 
 
