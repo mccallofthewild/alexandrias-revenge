@@ -26,16 +26,14 @@ The Great Library of Alexandria in Alexandria, Egypt, was one of the largest and
 
 # 🚀 Usage & Deployment
 ## 🏎 Fast Track
-### Step 1: 
 See this button? Click it!
 <div>
 	<a href="https://heroku.com/deploy" target="_blank" rel="noopener noreferrer">
-		<img width="200" src="https://www.herokucdn.com/deploy/button.svg" alt="Deploy">
+		<img width="200" src="https://www.herokucdn.com/deploy/button.svg" alt="Deploy to Heroku">
 	</a>
 </div>
 
-### Step 2: 
-There is no Step 2.
+After deploying, open the app and 
 
 ## 🖼 Client 
 If you only want to build an archive front-end, don't worry about setting up up a server. Simply send queries to https://alexandriasrevenge.herokuapp.com/graphql and you're good to go. <br> The production GraphQL Playground & Documentation (at [/graphql](https://alexandriasrevenge.herokuapp.com/graphql)) makes it a piece of cake! 🎂🍰
