@@ -26,14 +26,23 @@ The Great Library of Alexandria in Alexandria, Egypt, was one of the largest and
 
 # 🚀 Usage & Deployment
 ## 🏎 Fast Track
-See this button? Click it!
-<div>
-	<a href="https://heroku.com/deploy" target="_blank" rel="noopener noreferrer">
-		<img width="200" src="https://www.herokucdn.com/deploy/button.svg" alt="Deploy to Heroku">
-	</a>
-</div>
+1. See this button? Click it! <br>
+👇👇👇👇👇👇👇👇
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;
+<a href="https://heroku.com/deploy" target="_blank" rel="noopener noreferrer">
+<img width="200" src="https://www.herokucdn.com/deploy/button.svg" alt="Deploy to Heroku">
+</a>
+</p>
 
-After deploying, open the app and 
+2. Configure your `App name` 
+3. Scroll down and click `Deploy App`. Wait while heroku builds the app. 
+4. Click `↗️ View` to open your new `Alexandrias Revenge` node. 
+5. Wait ~1-30 minutes while your wallet is generated, encrypted, and permanently stored on the blockweave.
+6. Once your wallet is provisioned, reload the app. Your new wallet address appears at the top of the screen after `Donate:`. 
+7. As is, this node will be able to *download* archived files. However, you will need to send some AR (Arweave tokens) to the address in order to upload/archive new websites.
+8. 🏁🏁🏁🏁🏁🏁🏁🏁
+
 
 ## 🖼 Client 
 If you only want to build an archive front-end, don't worry about setting up up a server. Simply send queries to https://alexandriasrevenge.herokuapp.com/graphql and you're good to go. <br> The production GraphQL Playground & Documentation (at [/graphql](https://alexandriasrevenge.herokuapp.com/graphql)) makes it a piece of cake! 🎂🍰
