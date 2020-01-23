@@ -4,7 +4,7 @@
 	"repository": "https://github.com/mccallofthewild/alexandrias-revenge",
 	"logo": "https://github.com/mccallofthewild/alexandrias-revenge/raw/master/docs/logo.svg?sanitize=true",
 	"keywords": ["arweave", "blockchain", "archive"],
-	"website": "https://small-sharp-tool.com/",
+	"website": "https://alexandriasrevenge.herokuapp.com",
 	"env": {
 		"TEMPLATE_DEPLOY_DYNAMIC_WALLET_IDENTIFIER": {
 			"description": "A key to find your encrypted wallet on the Arweave network.",
